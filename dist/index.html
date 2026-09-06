@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#12292d">
+<meta name="description" content="Walk through an editable 3D landscape. Plant trees, change land cover, move the sun, and compare geometric shade and illustrative surface temperature under matching conditions.">
+<title>Landscape Climate Lab</title>
+<link rel="icon" href="icon.svg" type="image/svg+xml"><link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="topbar"><div class="brand"><span class="brand-symbol">◒</span><div>LANDSCAPE<strong>CLIMATE LAB</strong></div></div><div class="header-description">Design a place.<span>Explore shade and temperature.</span></div><div class="header-actions"><span class="edition">3D · LANDSCAPE LAB</span><button id="load-design" class="quiet-button">Load</button><button id="save-design" class="gold-button">Save design <span>↓</span></button><button id="help" class="help-button" aria-label="Open field guide">?</button></div></header>
+<main class="workspace">
+<aside class="sidebar">
+ <div class="sidebar-heading"><span class="eyebrow">YOUR LIVING LANDSCAPE</span><h1>Make room for shade.</h1><p>A small landscape. Space to experiment.</p></div>
+ <div class="tabs" role="tablist" aria-label="Lab controls"><button id="tab-design" role="tab" aria-selected="true" aria-controls="panel-design" data-tab="design">Design</button><button id="tab-sun" role="tab" aria-selected="false" aria-controls="panel-sun" data-tab="sun" tabindex="-1">Sun</button><button id="tab-temperature" role="tab" aria-selected="false" aria-controls="panel-temperature" data-tab="temperature" tabindex="-1">Temperature</button><button id="tab-compare" role="tab" aria-selected="false" aria-controls="panel-compare" data-tab="compare" tabindex="-1">Compare</button></div>
+ <div id="panel-design" role="tabpanel" aria-labelledby="tab-design" class="tab-panel">
+  <div class="section-heading"><h2>Choose a tool</h2><button id="undo" class="text-button" disabled>↶ Undo</button></div>
+  <div class="tool-modes" role="group" aria-label="Editing tool"><button data-tool="select" aria-pressed="true">Select</button><button data-tool="plant" aria-pressed="false">Plant</button><button data-tool="paint" aria-pressed="false">Paint</button></div>
+  <p class="hint" id="tool-hint">Select a tree or ground tile to inspect it. Drag the scene to orbit.</p>
+  <section class="design-section"><h2>Tree palette</h2><div class="tree-palette" role="group" aria-label="Tree form"><button data-tree="broadleaf" aria-pressed="true"><span>♣</span><strong>Broadleaf</strong><small>Wide crown</small></button><button data-tree="conifer" aria-pressed="false"><span>▲</span><strong>Conifer</strong><small>Tall crown</small></button><button data-tree="young" aria-pressed="false"><span>♧</span><strong>Young tree</strong><small>Small crown</small></button></div></section>
+  <section class="design-section"><h2>Land cover</h2><div class="land-palette" role="group" aria-label="Land cover"><button data-cover="grass" aria-pressed="true"><i style="--swatch:#94b668"></i>Grass</button><button data-cover="crop" aria-pressed="false"><i style="--swatch:#c4b869"></i>Crops</button><button data-cover="soil" aria-pressed="false"><i style="--swatch:#b28b61"></i>Bare soil</button><button data-cover="paving" aria-pressed="false"><i style="--swatch:#b3b6b2"></i>Paving</button><button data-cover="water" aria-pressed="false"><i style="--swatch:#55a8b8"></i>Water</button><button data-cover="forest" aria-pressed="false"><i style="--swatch:#3e7355"></i>Woodland</button></div><p class="hint">Woodland also plants a small group of trees. Each ground tile is 8 × 8 m.</p></section>
+  <section id="selection-panel" class="selection-panel"><span class="eyebrow">INSPECTOR</span><p>Select a tree to change its shape, move it, or remove it.</p></section>
+  <div class="design-summary"><span><b id="tree-total">0</b> trees</span><span><b>80 × 80</b> m scene</span></div>
+ </div>
+ <div id="panel-sun" role="tabpanel" aria-labelledby="tab-sun" class="tab-panel" hidden>
+  <div class="section-heading"><h2>Sun over Berlin</h2><span class="subtle">52.52° N</span></div><p class="hint">A fictional scene using Berlin’s sun position.</p>
+  <label class="field-label" for="sun-date">Date</label><input type="date" id="sun-date" value="2026-06-21" min="2020-01-01" max="2040-12-31">
+  <label class="field-label" for="utc-offset">Clock time zone</label><select id="utc-offset"><option value="2">Summer time · UTC+2</option><option value="1">Standard time · UTC+1</option></select>
+  <div class="range-label"><label for="sun-strength">Direct sunlight</label><output id="sun-strength-value">800 W/m²</output></div><input id="sun-strength" type="range" min="0" max="1000" step="25" value="800"><p class="hint">Direct normal irradiance: beam energy perpendicular to the sun’s rays. It changes brightness and beam exposure, not shadow geometry.</p>
+  <div class="sun-data"><div><span>Sun elevation</span><strong id="sun-elevation">…</strong></div><div><span>Sun direction</span><strong id="sun-azimuth">…</strong></div></div>
+  <label class="switch-row"><input type="checkbox" id="show-exposure"><span>Show ground exposure grid</span></label><p class="hint">Amber samples have direct sun; blue samples are geometrically shaded. Use Temperature for illustrative surface estimates.</p>
+  <section class="science-note"><h3>What the trees represent</h3><p>Crowns are solid geometric shapes. Moving and resizing them changes their shadows. Crown gaps are not modeled. The temperature layer adds assumed surface heat exchange without local air-cooling feedback.</p></section>
+ </div>
+ <div id="panel-temperature" role="tabpanel" aria-labelledby="tab-temperature" class="tab-panel" hidden>
+  <span class="eyebrow">SURFACE TEMPERATURE · °C</span><h2 class="compare-title">Read the ground.</h2>
+  <p class="thermal-badge">Illustrative equilibrium</p><p class="hint">An assumed surface energy balance, not measured or calibrated LST. Forest cells show the forest floor.</p>
+  <button id="toggle-thermal" class="wide-button thermal-toggle" aria-pressed="false">Show temperature map</button>
+  <label class="switch-row thermal-label-switch"><input type="checkbox" id="show-cell-values" checked><span>Show values in aerial view</span></label>
+  <label for="thermal-cell" class="field-label">Inspect a grid cell</label><select id="thermal-cell" aria-label="Grid cell to inspect"><option value="">Click the map or choose a cell</option></select>
+  <section id="thermal-inspector" class="thermal-inspector"><p>Click any ground cell to see its temperature, shade, and baseline comparison.</p></section>
+  <details class="weather-settings"><summary>Weather assumptions</summary>
+   <div class="range-label"><label for="air-temperature">Air temperature</label><output id="air-temperature-value">30 °C</output></div><input type="range" id="air-temperature" min="5" max="45" value="30" step="1">
+   <div class="range-label"><label for="thermal-wind">Wind speed</label><output id="thermal-wind-value">2.0 m/s</output></div><input type="range" id="thermal-wind" min="0.2" max="8" value="2" step="0.2">
+   <div class="range-label"><label for="thermal-humidity">Relative humidity</label><output id="thermal-humidity-value">50%</output></div><input type="range" id="thermal-humidity" min="10" max="95" value="50" step="5">
+   <div class="range-label"><label for="thermal-moisture">Water availability</label><output id="thermal-moisture-value">60%</output></div><input type="range" id="thermal-moisture" min="0" max="100" value="60" step="5">
+   <p class="hint">Water availability scales evaporation from soil and vegetation. It is an assumed fraction, not measured soil moisture. Water stays wet; paving stays dry.</p>
+  </details>
+  <section class="science-note"><h3>What this layer means</h3><p>Daytime ground and water surfaces under current conditions, sampled at 16 points per tile. Buildings and boardwalks are excluded. No heat storage, canopy temperature, or air-cooling feedback is modeled.</p><button id="thermal-notes" class="text-button">Equations and assumptions</button></section>
+ </div>
+ <div id="panel-compare" role="tabpanel" aria-labelledby="tab-compare" class="tab-panel" hidden>
+  <span class="eyebrow">CHANGE ONE THING. LOOK AGAIN.</span><h2 class="compare-title">Same trees, better shade.</h2><p class="compare-intro">Move trees near the marked walking route. Compare its shade with your saved baseline under exactly the same sun settings.</p>
+  <button id="capture-baseline" class="wide-button">Set current design as baseline</button><div class="comparison-table"><div class="comparison-header"><span>Walking route</span><span>Baseline</span><span>Design</span></div><div><span>Geometric shade</span><b id="baseline-shade">…</b><b id="design-shade">…</b></div><div><span>Direct beam</span><b id="baseline-beam">…</b><b id="design-beam">…</b></div><div><span>Trees</span><b id="baseline-trees">…</b><b id="design-trees">…</b></div></div><div id="comparison-result" class="comparison-result">Make a change to explore the difference.</div>
+  <button id="toggle-baseline" class="wide-button secondary" aria-pressed="false">View baseline in 3D</button><p class="hint">Your design is kept while you view the baseline. Sun controls apply to both designs.</p>
+  <section class="science-note"><h3>Compare through the day</h3><p>A layout that shades the route at 15:00 may leave it exposed at 10:00. Move the time slider and watch both results update.</p></section>
+ </div>
+ <div class="sidebar-bottom"><button id="reset-scene" class="text-button">Reset landscape</button><span id="save-status">Export a design to keep it</span></div>
+</aside>
+<section class="world-panel" aria-label="3D landscape">
+ <div id="viewport" class="viewport" tabindex="0" aria-label="Interactive 3D landscape. Drag to orbit, scroll to zoom. In walk mode use W A S D or the arrow keys to move."><div id="loading" class="loading"><span class="loader"></span><h2>Growing your landscape…</h2><p>Preparing the 3D scene and sunlight.</p></div></div>
+ <div class="view-controls" role="group" aria-label="Camera view"><button data-view="orbit" aria-pressed="true">↻ Orbit</button><button data-view="top" aria-pressed="false">⊞ Aerial</button><button data-view="walk" aria-pressed="false">↟ Walk</button><button id="recenter" aria-label="Recenter camera">⌖</button></div>
+ <div class="world-label"><span class="eyebrow">SCENARIO 01</span><strong id="world-name">The village edge</strong><span id="world-mode">Your design</span></div>
+ <div class="layer-controls" role="group" aria-label="Landscape display layer"><button data-layer="natural" aria-pressed="true">Natural</button><button data-layer="temperature" aria-pressed="false">Temperature</button></div>
+ <div class="north-marker"><b>N</b><span>↑</span></div>
+ <div id="route-readout" class="route-readout"><div><span class="eyebrow">WALKING ROUTE</span><strong><span id="route-shade">…</span><small> shaded</small></strong></div><div class="route-meter"><i id="route-meter-fill"></i></div><span id="route-detail">Measuring geometric shade…</span></div>
+ <div id="thermal-legend" class="thermal-legend" hidden><div><strong>Surface temperature</strong><span>ILLUSTRATIVE · °C</span></div><div class="thermal-gradient"></div><div class="thermal-ticks"><span>≤15</span><span>30</span><span>45</span><span>≥60 °C</span></div><p id="thermal-range">Daytime equilibrium · fixed color scale</p></div>
+ <div id="cell-labels" class="cell-labels" aria-hidden="true" hidden></div>
+ <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
+ <div id="walk-hint" class="walk-hint" hidden><strong>You’re on the ground.</strong><span>W A S D / arrows to move · drag to look · Esc to return</span></div>
+ <div id="walk-pad" class="walk-pad" hidden><button data-move="forward" aria-label="Walk forward">↑</button><div><button data-move="left" aria-label="Walk left">←</button><button data-move="back" aria-label="Walk backward">↓</button><button data-move="right" aria-label="Walk right">→</button></div></div>
+ <div class="time-dock"><div class="time-heading"><div><span class="eyebrow">FOLLOW THE SUN</span><strong id="time-label">15:00</strong><span id="date-caption">21 June · UTC+2</span></div><button id="play-sun" class="play-button" aria-label="Animate sun through the day" aria-pressed="false">▶</button></div><input type="range" id="time-slider" min="5" max="21" step="0.25" value="15" aria-label="Time of day"><div class="time-ticks"><span>05:00</span><span>09:00</span><span>13:00</span><span>17:00</span><span>21:00</span></div></div>
+ <div class="world-footer"><span id="view-instruction">Drag to orbit · scroll to zoom · click to select</span><button id="model-notes">Models & assumptions</button></div>
+</section>
+</main>
+<input id="design-file" type="file" accept="application/json,.json" hidden><dialog id="guide" aria-labelledby="guide-title"></dialog><dialog id="reset-dialog" aria-labelledby="reset-title"><h2 id="reset-title">Start from the original landscape?</h2><p>Your current design and baseline will be replaced. Save your design first if you want to keep it.</p><div class="dialog-buttons"><button id="cancel-reset">Keep editing</button><button id="confirm-reset" class="gold-button">Reset landscape</button></div></dialog>
+<script type="module" src="app.js"></script>
+<noscript>Enable JavaScript in your browser to use Landscape Climate Lab.</noscript>
+</body></html>
